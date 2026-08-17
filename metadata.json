@@ -1,0 +1,6 @@
+{
+  "name": "EduAI - Student Management System",
+  "description": "Enterprise-grade AI-powered Student Management System with attendance tracking, examination analytics, timetable scheduling, fee management, predictive dropout analysis, and Gemini AI assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
