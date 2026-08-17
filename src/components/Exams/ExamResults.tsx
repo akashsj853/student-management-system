@@ -11,11 +11,13 @@ import {
   AlertCircle,
   Eye,
   Printer,
-  ChevronRight
+  ChevronRight,
+  FileText
 } from 'lucide-react';
 import { ExamResultItem } from '../../types';
 import { ReportCardModal } from '../Common/ReportCardModal';
 import { RemedialPlanModal } from '../Common/RemedialPlanModal';
+import { SemesterProgressChart } from './SemesterProgressChart';
 
 interface ExamResultsProps {
   results: ExamResultItem[];
@@ -51,7 +53,15 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ results }) => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setSelectedResultForModal(filteredResults[0] || results[0])}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/25 transition-all"
+              title="Generate printable student academic & AI performance summary PDF"
+            >
+              <FileText className="w-4 h-4 text-white" />
+              <span>Generate Summary PDF</span>
+            </button>
             <button
               onClick={() => {
                 const csv = results.map(r => `${r.rank},${r.studentId},${r.studentName},${r.totalMarks},${r.cgpa},${r.status}`).join('\n');
@@ -65,17 +75,17 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ results }) => {
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export PDF / CSV</span>
+              <span>Export CSV</span>
             </button>
             <button
               onClick={() => {
                 setPublished(true);
                 alert('Exam results published to all Student & Parent portals!');
               }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/25 transition-all"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700 transition-all"
             >
               <Share2 className="w-3.5 h-3.5" />
-              <span>{published ? 'Results Published ✓' : 'Publish Results'}</span>
+              <span>{published ? 'Published ✓' : 'Publish'}</span>
             </button>
           </div>
         </div>
@@ -197,6 +207,14 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ results }) => {
         </div>
       </div>
 
+      {/* Recharts Line Chart: Academic Progress & Continuous Assessment Trends */}
+      <SemesterProgressChart
+        results={results}
+        selectedDept={selectedDept}
+        selectedYear={selectedYear}
+        selectedSem={selectedSem}
+      />
+
       {/* Results Table matching Image 12.png */}
       <div className="p-5 sm:p-6 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
@@ -228,7 +246,7 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ results }) => {
                 <th className="py-3 px-3">Total Marks</th>
                 <th className="py-3 px-3">CGPA</th>
                 <th className="py-3 px-3">Status</th>
-                <th className="py-3 px-3 text-right">Transcript</th>
+                <th className="py-3 px-3 text-right">Official Summary & Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/80">
@@ -278,13 +296,23 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ results }) => {
                   </td>
 
                   <td className="py-3 px-3 text-right">
-                    <button
-                      onClick={() => setSelectedResultForModal(r)}
-                      className="flex items-center gap-1 ml-auto px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 text-xs font-semibold border border-indigo-500/30 transition-colors"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>View Report Card</span>
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => setSelectedResultForModal(r)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-semibold border border-indigo-500/30 hover:border-indigo-500 shadow-sm transition-all"
+                        title="Generate printable summary PDF with grades, attendance, and AI diagnostic"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        <span>Summary PDF</span>
+                      </button>
+                      <button
+                        onClick={() => setSelectedResultForModal(r)}
+                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 border border-slate-700 transition-colors"
+                        title="View Full Transcript"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -293,10 +321,12 @@ export const ExamResults: React.FC<ExamResultsProps> = ({ results }) => {
         </div>
       </div>
 
-      {/* Official Report Card Modal */}
+      {/* Official Report Card & Printable Summary PDF Modal */}
       {selectedResultForModal && (
         <ReportCardModal
           result={selectedResultForModal}
+          allResults={results}
+          onSelectStudent={(res) => setSelectedResultForModal(res)}
           onClose={() => setSelectedResultForModal(null)}
         />
       )}

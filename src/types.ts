@@ -311,6 +311,25 @@ export interface TransitPass {
 export type AuditSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type AuditStatus = 'Verified' | 'Flagged' | 'Reverted' | 'Under Review';
 
+export interface SemesterProgressPoint {
+  milestone: string;
+  shortLabel: string;
+  week: string;
+  date: string;
+  classAverage: number;
+  topQuartile: number;
+  medianScore: number;
+  passingBenchmark: number;
+  attendanceCorrelation: number;
+  studentScores: Record<string, number>; // studentId -> score %
+  subjectAverages: {
+    dataStructures: number;
+    linearAlgebra: number;
+    quantumPhysics: number;
+    technicalWriting: number;
+  };
+}
+
 export interface AuditLog {
   id: string;
   timestamp: string;

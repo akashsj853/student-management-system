@@ -14,7 +14,8 @@ import {
   X,
   Printer,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  FileSpreadsheet
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { FeeLedgerItem } from '../../types';
@@ -37,6 +38,7 @@ export const FeeManagement: React.FC<FeeManagementProps> = ({
   const [paymentSuccessReceipt, setPaymentSuccessReceipt] = useState<FeeLedgerItem | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'bank' | 'wallet'>('card');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [exportFeedback, setExportFeedback] = useState(false);
 
   // Filtered Ledger Items
   const filteredLedger = ledger.filter((item) => {
@@ -51,6 +53,63 @@ export const FeeManagement: React.FC<FeeManagementProps> = ({
 
   const totalCollected = ledger.filter(i => i.status === 'Paid').reduce((acc, i) => acc + i.amount, 0);
   const totalPending = ledger.filter(i => i.status !== 'Paid').reduce((acc, i) => acc + i.amount, 0);
+
+  const handleExportFeeSummaryCSV = () => {
+    const paidItems = ledger.filter(i => i.status === 'Paid');
+    const pendingItems = ledger.filter(i => i.status === 'Pending');
+    const overdueItems = ledger.filter(i => i.status === 'Overdue');
+    const collectionEfficiency = ((totalCollected / ((totalCollected + totalPending) || 1)) * 100).toFixed(1);
+
+    const lines: string[] = [
+      '=== INSTITUTIONAL FEE MANAGEMENT & FINANCIAL SUMMARY ===',
+      `Export Timestamp,"${new Date().toLocaleString()}"`,
+      `Total Collected Revenue ($),${totalCollected}`,
+      `Total Pending Receivables ($),${totalPending}`,
+      `Total Projected Revenue ($),${totalCollected + totalPending}`,
+      `Collection Efficiency (%),${collectionEfficiency}%`,
+      `Total Paid Accounts,${paidItems.length}`,
+      `Total Pending Accounts,${pendingItems.length}`,
+      `Total Overdue Flagged Accounts,${overdueItems.length}`,
+      '',
+      '=== DEPARTMENTAL FEE BREAKDOWN ===',
+      'Department,Total Invoiced ($),Collected ($),Pending ($),Collection Rate (%)'
+    ];
+
+    const departments = ['Computer Science', 'Electrical Eng.', 'Mechanical Eng.'];
+    departments.forEach(dept => {
+      const deptItems = ledger.filter(i => i.department === dept);
+      const collected = deptItems.filter(i => i.status === 'Paid').reduce((acc, i) => acc + i.amount, 0);
+      const pending = deptItems.filter(i => i.status !== 'Paid').reduce((acc, i) => acc + i.amount, 0);
+      const total = collected + pending;
+      const rate = total > 0 ? ((collected / total) * 100).toFixed(1) : '0';
+      lines.push(`"${dept}",${total},${collected},${pending},${rate}%`);
+    });
+
+    lines.push('');
+    lines.push('=== STUDENT ACCOUNT LEDGER & INVOICE RECORDS ===');
+    lines.push('Invoice No,Student ID,Student Name,Department,Category,Amount ($),Due Date,Status,Paid Date,Transaction ID');
+
+    filteredLedger.forEach(item => {
+      const sanitizedName = item.studentName.replace(/"/g, '""');
+      lines.push(
+        `"${item.invoiceNo}","${item.studentId}","${sanitizedName}","${item.department}","${item.category}",${item.amount},"${item.dueDate}","${item.status}","${item.paidDate || 'N/A'}","${item.transactionId || 'N/A'}"`
+      );
+    });
+
+    const csvContent = lines.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fee_management_summary_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    setExportFeedback(true);
+    setTimeout(() => setExportFeedback(false), 3000);
+  };
 
   const handleProcessPayment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,19 +222,25 @@ export const FeeManagement: React.FC<FeeManagementProps> = ({
 
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => {
-                const csv = ledger.map(i => `${i.invoiceNo},${i.studentId},${i.studentName},${i.category},${i.amount},${i.status}`).join('\n');
-                const blob = new Blob([`Invoice,ID,Name,Category,Amount,Status\n${csv}`], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'fee_ledger.csv';
-                a.click();
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors"
+              onClick={handleExportFeeSummaryCSV}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                exportFeedback
+                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-600/30'
+                  : 'bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-500 shadow-md shadow-indigo-600/20'
+              }`}
+              title="Export Financial Summary & Student Ledger as CSV file"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export Ledger</span>
+              {exportFeedback ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white animate-pulse" />
+                  <span>CSV Exported</span>
+                </>
+              ) : (
+                <>
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>Export Summary CSV</span>
+                </>
+              )}
             </button>
           </div>
         </div>

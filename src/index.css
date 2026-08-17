@@ -53,3 +53,58 @@
 .animate-pulse-slow {
   animation: pulseGlow 4s ease-in-out infinite;
 }
+
+/* Print Styles for Clean PDF Summary Export */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Hide background overlays, sidebars, headers, floating navs */
+  nav, header, aside, .no-print, button, .modal-backdrop-blur {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .printable-document {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .printable-document * {
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  .print-bg-light {
+    background-color: #f8fafc !important;
+  }
+
+  .print-tag-pass {
+    background-color: #ecfdf5 !important;
+    color: #047857 !important;
+    border: 1px solid #a7f3d0 !important;
+  }
+
+  .print-tag-fail {
+    background-color: #fff1f2 !important;
+    color: #be123c !important;
+    border: 1px solid #fecdd3 !important;
+  }
+
+  @page {
+    margin: 1.2cm;
+    size: A4 portrait;
+  }
+}

@@ -15,7 +15,9 @@ import {
   Loader2,
   Calendar,
   ChevronRight,
-  Eye
+  Eye,
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
 import {
   BarChart,
@@ -54,6 +56,72 @@ export const AttendanceAnalytics: React.FC<AttendanceAnalyticsProps> = ({
   const [selectedDay, setSelectedDay] = useState<AttendanceDayRecord | null>(heatmapData[28]); // Nov 29 default
   const [faceScanning, setFaceScanning] = useState(false);
   const [faceSuccess, setFaceSuccess] = useState<string | null>(null);
+  const [exportFeedback, setExportFeedback] = useState(false);
+
+  const handleExportAttendanceSummaryCSV = () => {
+    const instructionalDays = heatmapData.filter(d => !d.isWeekend && !d.isHoliday);
+    const avgAttendance = (
+      instructionalDays.reduce((acc, d) => acc + d.attendancePercent, 0) / (instructionalDays.length || 1)
+    ).toFixed(1);
+    const criticalDefaulters = defaulters.filter(d => d.attendance < 75);
+    const totalDropoutRisk = DROPOUT_PREDICTION_DATA.reduce((acc, d) => acc + d.riskStudents, 0);
+
+    const lines: string[] = [
+      '=== CAMPUS ATTENDANCE ANALYTICS SUMMARY ===',
+      `Export Timestamp,"${new Date().toLocaleString()}"`,
+      `Academic Period,"Term 2 • Week 12 (November 2023)"`,
+      `Campus-wide Average Attendance,${avgAttendance}%`,
+      `Today's Attendance Rate,92.4%`,
+      `Total Absences Recorded,143`,
+      `Total Flagged Defaulters (<75%),${criticalDefaulters.length}`,
+      `Total High Risk Dropout Predictions,${totalDropoutRisk}`,
+      '',
+      '=== 30-DAY MONTHLY ATTENDANCE HEATMAP LOG ===',
+      'Day Number,Full Date,Attendance Rate (%),Status Category,Est. Present Students,Est. Enrolled Cohort'
+    ];
+
+    heatmapData.forEach(d => {
+      let status = 'Instructional Session';
+      if (d.isWeekend) status = 'Weekend Off';
+      else if (d.isHoliday) status = 'Campus Holiday';
+      const estPresent = d.isWeekend || d.isHoliday ? 0 : Math.round((1240 * d.attendancePercent) / 100);
+      lines.push(`"${d.day}","${d.date}",${d.attendancePercent}%,"${status}",${estPresent},1240`);
+    });
+
+    lines.push('');
+    lines.push('=== CRITICAL ATTENDANCE DEFAULTERS LIST ===');
+    lines.push('Student ID,Student Name,Department,Attendance (%),Parent Contact Phone,Academic Risk Level');
+
+    defaulters.forEach(d => {
+      const riskLevel = d.attendance < 65 ? 'Critical Dropout Risk' : 'Academic Warning Threshold';
+      lines.push(
+        `"${d.studentId}","${d.name.replace(/"/g, '""')}","${d.department}",${d.attendance}%,"${d.parentPhone}","${riskLevel}"`
+      );
+    });
+
+    lines.push('');
+    lines.push('=== COHORT PREDICTIVE DROPOUT RISK DISTRIBUTION ===');
+    lines.push('Cohort Department & Year,High Risk Students,Total Enrolled,Risk Percentage (%)');
+
+    DROPOUT_PREDICTION_DATA.forEach(c => {
+      const pct = ((c.riskStudents / c.total) * 100).toFixed(1);
+      lines.push(`"${c.cohort}",${c.riskStudents},${c.total},${pct}%`);
+    });
+
+    const csvContent = lines.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `attendance_summary_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    setExportFeedback(true);
+    setTimeout(() => setExportFeedback(false), 3000);
+  };
 
   const handleSimulateFaceRecognition = () => {
     setFaceScanning(true);
@@ -136,7 +204,7 @@ export const AttendanceAnalytics: React.FC<AttendanceAnalyticsProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Attendance Heatmap (2 cols) matching Image 5.png */}
         <div className="lg:col-span-2 p-5 sm:p-6 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl flex flex-col justify-between">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-indigo-400" />
@@ -146,9 +214,32 @@ export const AttendanceAnalytics: React.FC<AttendanceAnalyticsProps> = ({
                 Campus-wide presence density (target: 95%)
               </p>
             </div>
-            <span className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">
-              Term 2 • Week 12
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={handleExportAttendanceSummaryCSV}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  exportFeedback
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-600/30'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white border-indigo-500 shadow-md shadow-indigo-600/20'
+                }`}
+                title="Export Attendance Analytics & Defaulters as CSV"
+              >
+                {exportFeedback ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-white animate-pulse" />
+                    <span>CSV Exported</span>
+                  </>
+                ) : (
+                  <>
+                    <FileSpreadsheet className="w-3.5 h-3.5" />
+                    <span>Export Summary CSV</span>
+                  </>
+                )}
+              </button>
+              <span className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-800 text-slate-300 border border-slate-700">
+                Term 2 • Week 12
+              </span>
+            </div>
           </div>
 
           {/* 30-Day Heatmap Grid */}

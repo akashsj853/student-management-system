@@ -17,7 +17,8 @@ import {
   AuditLog,
   CampusLicense,
   HostelComplaint,
-  TransitPass
+  TransitPass,
+  SemesterProgressPoint
 } from '../types';
 
 export const INITIAL_STUDENTS: Student[] = [
@@ -1424,6 +1425,153 @@ export const INITIAL_TRANSIT_PASSES: TransitPass[] = [
     status: 'Active',
     qrCodeToken: 'QR-PASS-ZOE-R01-VALID-2026',
     paidAmount: 350
+  }
+];
+
+export const INITIAL_SEMESTER_PROGRESS: SemesterProgressPoint[] = [
+  {
+    milestone: 'Diagnostic Baseline',
+    shortLabel: 'Wk 2 Baseline',
+    week: 'Week 2',
+    date: 'Jan 18, 2024',
+    classAverage: 68.2,
+    topQuartile: 84.0,
+    medianScore: 67.5,
+    passingBenchmark: 70.0,
+    attendanceCorrelation: 94.2,
+    studentScores: {
+      'CS-2023-089': 92.0, // Elena
+      'CS-2023-090': 88.5, // Marcus
+      'BIO-2023-019': 91.0, // Zoe
+      'CS-2023-091': 72.0, // Sarah
+      'ME-2022-115': 54.0  // David
+    },
+    subjectAverages: {
+      dataStructures: 64.0,
+      linearAlgebra: 71.5,
+      quantumPhysics: 66.2,
+      technicalWriting: 72.0
+    }
+  },
+  {
+    milestone: 'Unit Quiz 1',
+    shortLabel: 'Wk 5 Quiz 1',
+    week: 'Week 5',
+    date: 'Feb 08, 2024',
+    classAverage: 72.4,
+    topQuartile: 88.5,
+    medianScore: 71.0,
+    passingBenchmark: 70.0,
+    attendanceCorrelation: 92.8,
+    studentScores: {
+      'CS-2023-089': 95.0,
+      'CS-2023-090': 90.0,
+      'BIO-2023-019': 94.0,
+      'CS-2023-091': 76.5,
+      'ME-2022-115': 58.0
+    },
+    subjectAverages: {
+      dataStructures: 70.2,
+      linearAlgebra: 75.0,
+      quantumPhysics: 71.0,
+      technicalWriting: 74.5
+    }
+  },
+  {
+    milestone: 'Midterm Assessments',
+    shortLabel: 'Wk 8 Midterms',
+    week: 'Week 8',
+    date: 'Mar 01, 2024',
+    classAverage: 75.8,
+    topQuartile: 91.2,
+    medianScore: 74.5,
+    passingBenchmark: 70.0,
+    attendanceCorrelation: 89.5,
+    studentScores: {
+      'CS-2023-089': 97.0,
+      'CS-2023-090': 94.0,
+      'BIO-2023-019': 96.0,
+      'CS-2023-091': 80.0,
+      'ME-2022-115': 52.0
+    },
+    subjectAverages: {
+      dataStructures: 73.5,
+      linearAlgebra: 78.2,
+      quantumPhysics: 75.0,
+      technicalWriting: 77.0
+    }
+  },
+  {
+    milestone: 'Lab Practical & Projects',
+    shortLabel: 'Wk 11 Lab Sprints',
+    week: 'Week 11',
+    date: 'Mar 22, 2024',
+    classAverage: 79.5,
+    topQuartile: 93.8,
+    medianScore: 78.0,
+    passingBenchmark: 70.0,
+    attendanceCorrelation: 91.0,
+    studentScores: {
+      'CS-2023-089': 98.0,
+      'CS-2023-090': 95.0,
+      'BIO-2023-019': 97.0,
+      'CS-2023-091': 83.0,
+      'ME-2022-115': 62.0
+    },
+    subjectAverages: {
+      dataStructures: 81.0,
+      linearAlgebra: 80.5,
+      quantumPhysics: 77.4,
+      technicalWriting: 80.0
+    }
+  },
+  {
+    milestone: 'Pre-Final Mock Exam',
+    shortLabel: 'Wk 14 Pre-Finals',
+    week: 'Week 14',
+    date: 'Apr 12, 2024',
+    classAverage: 82.1,
+    topQuartile: 96.0,
+    medianScore: 81.5,
+    passingBenchmark: 70.0,
+    attendanceCorrelation: 88.0,
+    studentScores: {
+      'CS-2023-089': 98.5,
+      'CS-2023-090': 96.5,
+      'BIO-2023-019': 98.0,
+      'CS-2023-091': 85.5,
+      'ME-2022-115': 60.5
+    },
+    subjectAverages: {
+      dataStructures: 84.2,
+      linearAlgebra: 83.0,
+      quantumPhysics: 80.5,
+      technicalWriting: 82.0
+    }
+  },
+  {
+    milestone: 'Semester Final Examinations',
+    shortLabel: 'Wk 16 Finals',
+    week: 'Week 16',
+    date: 'May 05, 2024',
+    classAverage: 84.6,
+    topQuartile: 97.4,
+    medianScore: 83.8,
+    passingBenchmark: 70.0,
+    attendanceCorrelation: 93.0,
+    studentScores: {
+      'CS-2023-089': 98.2,
+      'CS-2023-090': 96.8,
+      'BIO-2023-019': 97.5,
+      'CS-2023-091': 84.0,
+      'ME-2022-115': 59.0
+    },
+    subjectAverages: {
+      dataStructures: 86.5,
+      linearAlgebra: 85.2,
+      quantumPhysics: 82.8,
+      technicalWriting: 84.0
+    }
   }
 ];
 
